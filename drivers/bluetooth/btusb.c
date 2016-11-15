@@ -28,7 +28,9 @@
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
 
+#ifdef CONFIG_BT_ATH3K
 #include "ath3k.h"
+#endif
 
 #define VERSION "0.6"
 
@@ -36,7 +38,7 @@ static bool disable_scofix;
 static bool force_scofix;
 
 static int sco_conn;
-static int reset = 1;
+static bool reset = true;
 
 static struct usb_driver btusb_driver;
 
@@ -1978,7 +1980,9 @@ static int btusb_probe(struct usb_interface *intf,
 	struct btusb_data *data;
 	struct hci_dev *hdev;
 	int i, err;
+#ifdef CONFIG_BT_ATH3K
 	struct ath3k_version version;
+#endif
 
 	BT_DBG("intf %p id %p", intf, id);
 
@@ -1997,6 +2001,7 @@ static int btusb_probe(struct usb_interface *intf,
 	if (id->driver_info == BTUSB_IGNORE)
 		return -ENODEV;
 
+#ifdef CONFIG_BT_ATH3K
 	if (id->driver_info & BTUSB_ATH3012) {
 		struct usb_device *udev = interface_to_usbdev(intf);
 		/* Old firmware would otherwise let ath3k driver load
@@ -2016,6 +2021,7 @@ static int btusb_probe(struct usb_interface *intf,
 			return -ENODEV;
 		}
 	}
+#endif
 
 	data = devm_kzalloc(&intf->dev, sizeof(*data), GFP_KERNEL);
 	if (!data)
