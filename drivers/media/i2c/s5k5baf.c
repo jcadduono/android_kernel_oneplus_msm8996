@@ -1793,7 +1793,7 @@ static const struct v4l2_subdev_ops s5k5baf_subdev_ops = {
 
 static int s5k5baf_configure_gpios(struct s5k5baf *state)
 {
-	static const char const *name[] = { "S5K5BAF_STBY", "S5K5BAF_RST" };
+	static const char *name[] = { "S5K5BAF_STBY", "S5K5BAF_RST" };
 	struct i2c_client *c = v4l2_get_subdevdata(&state->sd);
 	struct s5k5baf_gpio *g = state->gpios;
 	int ret, i;

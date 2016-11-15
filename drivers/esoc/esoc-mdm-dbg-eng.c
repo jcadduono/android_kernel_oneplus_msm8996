@@ -246,7 +246,7 @@ static ssize_t req_eng_resp_store(struct device_driver *drv, const char *buf,
 							size_t count)
 {
 	unsigned int i;
-	const struct esoc_clink_ops const *clink_ops = dbg_clink->clink_ops;
+	const struct esoc_clink_ops *clink_ops = dbg_clink->clink_ops;
 
 	dev_dbg(&dbg_clink->dev, "user input req eng response %s\n", buf);
 	for (i = 0; i < ARRAY_SIZE(in_to_resp); i++) {

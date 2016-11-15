@@ -259,7 +259,7 @@ struct apsd_result {
 	const enum power_supply_type pst;
 };
 
-static const struct apsd_result const smb138x_apsd_results[] = {
+static const struct apsd_result smb138x_apsd_results[] = {
 	{"UNKNOWN", 0, POWER_SUPPLY_TYPE_UNKNOWN},
 	{"SDP", SDP_CHARGER_BIT, POWER_SUPPLY_TYPE_USB},
 	{"CDP", CDP_CHARGER_BIT, POWER_SUPPLY_TYPE_USB_CDP},

@@ -287,7 +287,7 @@ void msm_delete_stream(unsigned int session_id, unsigned int stream_id)
 	if (!session)
 		return;
 
-		stream = msm_queue_find(&session->stream_q, struct msm_stream,
+	stream = msm_queue_find(&session->stream_q, struct msm_stream,
 			list, __msm_queue_find_stream, &stream_id);
 	if (!stream)
 			return;
@@ -1231,8 +1231,8 @@ static int msm_probe(struct platform_device *pdev)
 	if (WARN_ON(rc < 0))
 		goto media_fail;
 
-	if (WARN_ON((rc == media_entity_init(&pvdev->vdev->entity,
-			0, NULL, 0)) < 0))
+	rc = media_entity_init(&pvdev->vdev->entity, 0, NULL, 0);
+	if (WARN_ON(rc < 0))
 		goto entity_fail;
 
 	pvdev->vdev->entity.type = MEDIA_ENT_T_DEVNODE_V4L;

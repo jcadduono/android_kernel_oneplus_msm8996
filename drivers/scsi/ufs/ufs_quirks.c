@@ -133,14 +133,14 @@ int ufs_fill_info(struct ufs_hba *hba)
 	/* Copy UFS info from host controller structure (ex:vendor name, firmware revision) */
 	if(!hba->sdev_ufs_device->vendor) {
 		dev_err(hba->dev, "%s: UFS vendor info is NULL\n", __func__);
-		strncpy(ufs_vendor, "UNKNOWN", 7);
+		strcpy(ufs_vendor, "NULL");
 	} else {
 		strncpy(ufs_vendor, hba->sdev_ufs_device->vendor, sizeof(ufs_vendor)-1);
 	}
 
 	if(!hba->sdev_ufs_device->rev) {
 		dev_err(hba->dev, "%s: UFS firmware info is NULL\n", __func__);
-		strncpy(ufs_rev, "UNKNOWN", 7);
+		strcpy(ufs_rev, "NULL");
 	} else {
 		strncpy(ufs_rev, hba->sdev_ufs_device->rev, sizeof(ufs_rev)-1);
 	}
