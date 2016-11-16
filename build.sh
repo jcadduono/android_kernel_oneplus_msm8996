@@ -1,5 +1,5 @@
 #!/bin/bash
-# Android kernel for OnePlus msm8996 devices build script by jcadduono
+# TWRP kernel for OnePlus msm8996 devices build script by jcadduono
 
 ################### BEFORE STARTING ################
 #
@@ -60,7 +60,7 @@ while [ $# != 0 ]; do
 	shift
 done
 
-[ "$TARGET" ] || TARGET=oneplus
+[ "$TARGET" ] || TARGET=twrp
 [ "$DEVICE" ] || DEVICE=oneplus3t
 
 DEFCONFIG=${TARGET}_defconfig
