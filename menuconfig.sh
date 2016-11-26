@@ -29,7 +29,7 @@ while [ $# != 0 ]; do
 	shift
 done
 
-[ "$TARGET" ] || TARGET=oneplus
+[ "$TARGET" ] || TARGET=nethunter
 
 DEFCONFIG=${TARGET}_defconfig
 DEFCONFIG_FILE=$RDIR/arch/$ARCH/configs/$DEFCONFIG
