@@ -1,5 +1,5 @@
 #!/bin/bash
-# Android kernel for OnePlus msm8996 devices build script by jcadduono
+# Kali NetHunter kernel for OnePlus msm8996 devices build script by jcadduono
 
 ################### BEFORE STARTING ################
 #
@@ -54,7 +54,7 @@ while [ $# != 0 ]; do
 	shift
 done
 
-[ "$TARGET" ] || TARGET=oneplus
+[ "$TARGET" ] || TARGET=nethunter
 
 DEFCONFIG=${TARGET}_defconfig
 
