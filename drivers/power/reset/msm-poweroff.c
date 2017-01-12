@@ -34,7 +34,9 @@
 #include <soc/qcom/restart.h>
 #include <soc/qcom/watchdog.h>
 
+#ifdef CONFIG_PARAM_READ_WRITE
 #include <linux/param_rw.h>
+#endif
 
 #define EMERGENCY_DLOAD_MAGIC1    0x322A4F99
 #define EMERGENCY_DLOAD_MAGIC2    0xC67E4350
@@ -48,10 +50,11 @@
 #define SCM_EDLOAD_MODE			0X01
 #define SCM_DLOAD_CMD			0x10
 
+#ifdef CONFIG_PARAM_READ_WRITE
 #define DEVICE_INFO_SIZE 2048
 /*Define a global pointer which points to the boot shared imem cookie structure */
-char oem_pcba_number[28];
-char device_info[DEVICE_INFO_SIZE];
+static char oem_pcba_number[28];
+static char device_info[DEVICE_INFO_SIZE];
 extern char oem_serialno[16];
 extern char oem_hw_version[3];
 extern char oem_rf_version[3];
@@ -62,6 +65,7 @@ extern char oem_ufs_fw_version[3];
 extern uint32_t chip_serial_num;
 
 extern struct boot_shared_imem_cookie_type *boot_shared_imem_cookie_ptr;
+#endif
 
 static int restart_mode;
 static void *restart_reason, *dload_type_addr;
@@ -571,6 +575,7 @@ static int msm_restart_probe(struct platform_device *pdev)
 			pr_err("unable to map imem EDLOAD mode offset\n");
 	}
 
+#ifdef CONFIG_PARAM_READ_WRITE
 	get_param_pcba_number(oem_pcba_number);
 	sprintf(device_info,
 		"hardware version: %s\r\n"
@@ -593,6 +598,7 @@ static int msm_restart_probe(struct platform_device *pdev)
 		__raw_writel(virt_to_phys(device_info), &(boot_shared_imem_cookie_ptr->device_info_addr));
 		__raw_writel(strlen(device_info), &(boot_shared_imem_cookie_ptr->device_info_size));
 	}
+#endif
 
 	np = of_find_compatible_node(NULL, NULL,
 				"qcom,msm-imem-dload-type");

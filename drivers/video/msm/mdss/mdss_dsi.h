@@ -535,7 +535,9 @@ struct mdss_dsi_ctrl_pdata {
 	struct dsi_panel_cmds hbm_on_cmds;
 	struct dsi_panel_cmds hbm_off_cmds;
 	int  SRGB_mode;
+#ifdef CONFIG_PARAM_READ_WRITE
 	int SRGB_first_on;
+#endif
 	struct dsi_panel_cmds srgb_on_cmds;
 	struct dsi_panel_cmds srgb_off_cmds;
 

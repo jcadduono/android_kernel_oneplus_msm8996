@@ -1300,6 +1300,7 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 	pinfo = &pdata->panel_info;
 	mipi = &pdata->panel_info.mipi;
 
+#ifdef CONFIG_PARAM_READ_WRITE
 	if (!ctrl_pdata->SRGB_first_on){
 		ctrl_pdata->SRGB_first_on = 1;
 		get_param_lcm_srgb_mode(&(ctrl_pdata->SRGB_mode));
@@ -1309,6 +1310,7 @@ int mdss_dsi_on(struct mdss_panel_data *pdata)
 		else
 			pr_err("%s:srgb mode %d\n",__func__,ctrl_pdata->SRGB_mode);
 	}
+#endif
 
 	if (mdss_dsi_is_panel_on_interactive(pdata)) {
 		/*
@@ -2573,7 +2575,9 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		break;
 	case MDSS_EVENT_PANEL_SET_SRGB_MODE:
 		ctrl_pdata->SRGB_mode= (int)(unsigned long) arg;
+#ifdef CONFIG_PARAM_READ_WRITE
 		set_param_lcm_srgb_mode(&(ctrl_pdata->SRGB_mode));
+#endif
 		mdss_dsi_panel_set_srgb_mode(ctrl_pdata,(int)(unsigned long) ctrl_pdata->SRGB_mode);
 		break;
 	case MDSS_EVENT_PANEL_GET_SRGB_MODE:

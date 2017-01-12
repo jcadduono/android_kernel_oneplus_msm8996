@@ -65,7 +65,9 @@ void __weak panic_smp_self_stop(void)
 		cpu_relax();
 }
 
+#ifdef CONFIG_OEM_TRACE_SUPORT
 extern bool is_otrace_on(void);
+#endif
 
 /**
  *	panic - halt the system
@@ -112,6 +114,7 @@ void panic(const char *fmt, ...)
 	va_end(args);
 	pr_emerg("Kernel panic - not syncing: %s\n", buf);
 
+#ifdef CONFIG_OEM_TRACE_SUPORT
     //pr_info("kernel panic because of %s\n", fmt);
 	if(!is_otrace_on()) {
         if(strcmp(fmt, "modem") == 0){
@@ -125,6 +128,7 @@ void panic(const char *fmt, ...)
             kernel_restart("kernel");
         }
 	}
+#endif
 
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 	/*

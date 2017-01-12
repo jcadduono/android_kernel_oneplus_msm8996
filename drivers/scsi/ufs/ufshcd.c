@@ -6774,7 +6774,9 @@ static int ufshcd_probe_hba(struct ufs_hba *hba)
 		if (ufshcd_scsi_add_wlus(hba))
 			goto out;
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 		ufs_fill_info(hba);
+#endif
 
 		scsi_scan_host(hba->host);
 		pm_runtime_put_sync(hba->dev);

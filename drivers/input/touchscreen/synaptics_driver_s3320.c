@@ -51,10 +51,13 @@
 #include <linux/notifier.h>
 #endif
 
+#ifdef CONFIG_OEM_PROJECT_INFO
+#include <linux/project_info.h>
+#endif
+
 #include <linux/input/mt.h>
 
 #include "synaptics_redremote.h"
-#include <linux/project_info.h>
 #include "synaptics_baseline.h"
 
 /*------------------------------------------------Global Define--------------------------------------------*/
@@ -2529,7 +2532,9 @@ static int synatpitcs_fw_update(struct device *dev, bool force)
 		if(1 == check_version ) {
 			TPD_DEBUG("enter version 15801 update mode\n");
 			strcpy(ts->fw_name,"tp/fw_synaptics_15801.img");
+#ifdef CONFIG_OEM_PROJECT_INFO
 			push_component_info(TP, ts->fw_id, "S3718_vA");
+#endif
 			ret = request_firmware(&fw, ts->fw_name, dev);
 			if (ret < 0) {
 				TPD_ERR("Request firmware failed - %s (%d)\n",ts->fw_name, ret);
@@ -2538,7 +2543,9 @@ static int synatpitcs_fw_update(struct device *dev, bool force)
 
 		 }else{
 		        TPD_DEBUG("enter version 15801 vb update mode\n");
+#ifdef CONFIG_OEM_PROJECT_INFO
 			push_component_info(TP, ts->fw_id, "S3718_vB");
+#endif
 			ret = request_firmware(&fw, ts->fw_name, dev);
 			if (ret < 0) {
 				TPD_ERR("Request firmware failed - %s (%d)\n",ts->fw_name, ret);
@@ -2548,7 +2555,9 @@ static int synatpitcs_fw_update(struct device *dev, bool force)
 
 	}else if(!strncmp(ts->manu_name,"S3508",5) || !strncmp(ts->manu_name,"15811",5)){
 		        TPD_ERR("enter version 15811 update mode\n");
+#ifdef CONFIG_OEM_PROJECT_INFO
 			push_component_info(TP, ts->fw_id, "S3508");
+#endif
 			ret = request_firmware(&fw, ts->fw_name, dev);
 			if (ret < 0) {
 				TPD_ERR("Request firmware failed - %s (%d)\n",ts->fw_name, ret);

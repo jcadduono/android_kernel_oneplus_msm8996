@@ -17,20 +17,22 @@
 
 #include <linux/gpio.h>
 
+static bool project_info_init_done;
+
 typedef		__u32		uint32;
 
 struct project_info{
-       char project_name[8];  //eg, 14049
-       uint32  hw_version;  //PCB number, T0, EVT
-       uint32  rf_v1;   //v1 for mainboard_rf_version
-       uint32  rf_v2;   //v2 for aboard_rf_version
-       uint32  rf_v3;
-       uint32  modem;
-       uint32  operator;
-       uint32  ddr_manufacture_info;
-       uint32  ddr_raw;
-       uint32  ddr_column;
-       uint32  ddr_reserve_info;
+	char project_name[8];  //eg, 14049
+	uint32  hw_version;  //PCB number, T0, EVT
+	uint32  rf_v1;   //v1 for mainboard_rf_version
+	uint32  rf_v2;   //v2 for aboard_rf_version
+	uint32  rf_v3;
+	uint32  modem;
+	uint32  operator;
+	uint32  ddr_manufacture_info;
+	uint32  ddr_raw;
+	uint32  ddr_column;
+	uint32  ddr_reserve_info;
 };
 
 struct component_info{
@@ -63,15 +65,15 @@ static DEVICE_ATTR(secboot_status, S_IRUGO, project_info_get, NULL);
 
 uint32 get_secureboot_fuse_status(void)
 {
-    void __iomem *oem_config_base;
-    uint32 secure_oem_config = 0;
+	void __iomem *oem_config_base;
+	uint32 secure_oem_config = 0;
 
-    oem_config_base = ioremap(0x70378 , 10);
-    secure_oem_config = __raw_readl(oem_config_base);
-    iounmap(oem_config_base);
-    pr_err("secure_oem_config 0x%x\n", secure_oem_config);
+	oem_config_base = ioremap(0x70378 , 10);
+	secure_oem_config = __raw_readl(oem_config_base);
+	iounmap(oem_config_base);
+	pr_err("secure_oem_config 0x%x\n", secure_oem_config);
 
-    return secure_oem_config;
+	return secure_oem_config;
 }
 
 static ssize_t project_info_get(struct device *dev,
@@ -210,11 +212,11 @@ static struct attribute *component_info_sysfs_entries[] = {
 	&dev_attr_backlight.attr,
 	&dev_attr_mainboard.attr,
 	&dev_attr_fingerprints.attr,
-    &dev_attr_touch_key.attr,
-    &dev_attr_ufs.attr,
-    &dev_attr_Aboard.attr,
-    &dev_attr_nfc.attr,
-    &dev_attr_fast_charge.attr,
+	&dev_attr_touch_key.attr,
+	&dev_attr_ufs.attr,
+	&dev_attr_Aboard.attr,
+	&dev_attr_nfc.attr,
+	&dev_attr_fast_charge.attr,
 	NULL,
 };
 
@@ -252,15 +254,15 @@ static ssize_t component_info_get(struct device *dev,
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(BACKLIGHT), get_component_manufacture(BACKLIGHT));
 	if (attr == &dev_attr_mainboard)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(MAINBOARD), get_component_manufacture(MAINBOARD));
-    if (attr == &dev_attr_fingerprints)
+	if (attr == &dev_attr_fingerprints)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(FINGERPRINTS), get_component_manufacture(FINGERPRINTS));
-    if (attr == &dev_attr_touch_key)
+	if (attr == &dev_attr_touch_key)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(TOUCH_KEY), get_component_manufacture(TOUCH_KEY));
 	if (attr == &dev_attr_ufs)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(UFS), get_component_manufacture(UFS));
 	if (attr == &dev_attr_Aboard)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(ABOARD), get_component_manufacture(ABOARD));
-    if (attr == &dev_attr_nfc)
+	if (attr == &dev_attr_nfc)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(NFC), get_component_manufacture(NFC));
 	if (attr == &dev_attr_fast_charge)
 		return sprintf(buf, "VER:\t%s\nMANU:\t%s\n", get_component_version(FAST_CHARGE), get_component_manufacture(FAST_CHARGE));
@@ -305,7 +307,7 @@ static char ddr_version[32] = {0};
 static char ddr_manufacture[20] = {0};
 
 struct ddr_manufacture ddr_manufacture_list[]={
-     {1,"Samsung "},
+	{1,"Samsung "},
 	 {2,"Qimonda "},
 	 {3,"Elpida "},
 	 {4,"Etpon "},
@@ -339,20 +341,17 @@ static int Aboard_gpio = 130;//msm8996 kernel gpio_num == hw gpio num now
 
 void init_a_board_gpio(void)
 {
-    if(gpio_is_valid(Aboard_gpio))
-    {
-		if (gpio_request(Aboard_gpio, "ID_ANT_PCBA")) {
+	if (gpio_is_valid(Aboard_gpio)) {
+		if (gpio_request(Aboard_gpio, "ID_ANT_PCBA"))
 			pr_err("%s: gpio_request(%d) fail!\n",__func__,Aboard_gpio);
-		}
-        gpio_direction_input(Aboard_gpio);
-    }
-    else
-        pr_err("%s: Aboard_gpio %d is invalid\n",__func__,Aboard_gpio);
+		gpio_direction_input(Aboard_gpio);
+		return;
+	}
+	pr_err("%s: Aboard_gpio %d is invalid\n",__func__,Aboard_gpio);
 }
 
 int __init init_project_info(void)
 {
-	static bool project_info_init_done;
 	int ddr_size;
 
 	if (project_info_init_done)
@@ -363,12 +362,14 @@ int __init init_project_info(void)
 				0,
 				SMEM_ANY_HOST_FLAG);
 
-	if (IS_ERR_OR_NULL(project_info_desc))
+	if (IS_ERR_OR_NULL(project_info_desc)) {
 		pr_err("%s: get project_info failure\n",__func__);
-	else
-		pr_err("%s: project_name: %s hw_version: %d rf_v1: %d rf_v2: %d: rf_v3: %d\n",
-						__func__, project_info_desc->project_name, project_info_desc->hw_version,
-								project_info_desc->rf_v1, project_info_desc->rf_v2, project_info_desc->rf_v3);
+		return 0;
+	}
+
+	pr_info("%s: project_name: %s hw_version: %d rf_v1: %d rf_v2: %d: rf_v3: %d\n",
+					__func__, project_info_desc->project_name, project_info_desc->hw_version,
+							project_info_desc->rf_v1, project_info_desc->rf_v2, project_info_desc->rf_v3);
 
 	//snprintf(mainboard_version, sizeof(mainboard_version), "%d",project_info_desc->hw_version);
 	switch(project_info_desc->hw_version) {
@@ -396,20 +397,16 @@ int __init init_project_info(void)
 	}
 	push_component_info(MAINBOARD,mainboard_version, mainboard_manufacture);
 
-    if(project_info_desc->hw_version <= 12)//EVT1    EVB:10 T0:11 EVT1:12 EVT2:13 DVT:14 PVT/MP:15
-    {
-        init_a_board_gpio();
-        snprintf(Aboard_version, sizeof(Aboard_version), "%d",gpio_get_value(Aboard_gpio));
-        push_component_info(ABOARD,Aboard_version, mainboard_manufacture);
-        pr_err("%s: Aboard_gpio(%d) value(%d)\n",__func__,Aboard_gpio,gpio_get_value(Aboard_gpio));
-    }
-    else//start from EVT2 use MPP07
-    {
-        pr_err("%s: aboard_version: %d \n",
-						__func__, project_info_desc->rf_v2);
+	if (project_info_desc->hw_version <= 12) {//EVT1    EVB:10 T0:11 EVT1:12 EVT2:13 DVT:14 PVT/MP:15
+		init_a_board_gpio();
+		snprintf(Aboard_version, sizeof(Aboard_version), "%d",gpio_get_value(Aboard_gpio));
+		push_component_info(ABOARD,Aboard_version, mainboard_manufacture);
+		pr_err("%s: Aboard_gpio(%d) value(%d)\n",__func__,Aboard_gpio,gpio_get_value(Aboard_gpio));
+	} else {//start from EVT2 use MPP07
+		pr_err("%s: aboard_version: %d \n", __func__, project_info_desc->rf_v2);
 		snprintf(Aboard_version, sizeof(Aboard_version), "%d",project_info_desc->rf_v2);
 		push_component_info(ABOARD,Aboard_version, mainboard_manufacture);
-    }
+	}
 
 	//add ddr row, column information and manufacture name information
 	get_ddr_manufacture_name();

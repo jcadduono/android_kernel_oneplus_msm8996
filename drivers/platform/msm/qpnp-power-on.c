@@ -31,7 +31,9 @@
 #include <linux/qpnp/power-on.h>
 #include <linux/syscalls.h>
 
+#ifdef CONFIG_OEM_FORCE_DUMP
 #include <linux/oem_force_dump.h>
+#endif
 
 #define CREATE_MASK(NUM_BITS, POS) \
 	((unsigned char) (((1 << (NUM_BITS)) - 1) << (POS)))
@@ -822,7 +824,9 @@ qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 
 	cfg->old_state = !!key_status;
 
+#ifdef CONFIG_OEM_FORCE_DUMP
 	oem_check_force_dump_key(cfg->key_code,key_status);
+#endif
 
 	return 0;
 }

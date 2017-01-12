@@ -13,10 +13,10 @@
 
 #include "ufshcd.h"
 #include "ufs_quirks.h"
-#include <linux/project_info.h>
 
-char oem_ufs_manufacture_info[16];
-char oem_ufs_fw_version[3];
+#ifdef CONFIG_OEM_PROJECT_INFO
+#include <linux/project_info.h>
+#endif
 
 static struct ufs_card_fix ufs_fixups[] = {
 	/* UFS cards deviations table */
@@ -76,7 +76,27 @@ out:
 	return err;
 }
 
-static int ufs_get_capacity_info(struct ufs_hba *hba,	u64 *pcapacity)
+#ifdef CONFIG_OEM_PROJECT_INFO
+static char oem_ufs_manufacture_info[16];
+static char oem_ufs_fw_version[3];
+static char ufs_vendor_and_rev[32]={'\0'};
+
+static char* ufs_get_capacity_size(u64 capacity)
+{
+	if (capacity == 0x1D62000){ //16G
+		return "16G";
+	} else if (capacity == 0x3B9E000){ //32G
+		return "32G";
+	} else if (capacity == 0x7734000){ //64G
+		return "64G";
+	} else if (capacity == 0xEE60000){ //128G
+		return "128G";
+	} else {
+		return "0G";
+	}
+}
+
+static int ufs_get_capacity_info(struct ufs_hba *hba, u64 *pcapacity)
 {
 	int err;
 	u8 geometry_buf[QUERY_DESC_GEOMETRY_MAZ_SIZE];
@@ -95,28 +115,12 @@ static int ufs_get_capacity_info(struct ufs_hba *hba,	u64 *pcapacity)
 				 (u64)geometry_buf[0x04 + 6] << 8 |
 				 (u64)geometry_buf[0x04 + 7];
 
-	printk("ufs_get_capacity_info size = 0x%llx", *pcapacity);
+	dev_info(hba->dev, "ufs_get_capacity_info size = 0x%llx", *pcapacity);
 
 out:
 	return err;
 }
 
-static char* ufs_get_capacity_size(u64 capacity)
-{
-	if (capacity == 0x1D62000){ //16G
-		return "16G";
-	} else if (capacity == 0x3B9E000){ //32G
-		return "32G";
-	} else if (capacity == 0x7734000){ //64G
-		return "64G";
-	} else if (capacity == 0xEE60000){ //128G
-		return "128G";
-	} else {
-		return "0G";
-	}
-}
-
-char ufs_vendor_and_rev[32]={'\0'};
 int ufs_fill_info(struct ufs_hba *hba)
 {
 	int err=0;
@@ -160,13 +164,12 @@ int ufs_fill_info(struct ufs_hba *hba)
 	strcat(ufs_vendor_and_rev, " FW_");
 	strcat(ufs_vendor_and_rev, ufs_rev);
 
-	ufs_get_capacity_size(ufs_capacity);
-
 	push_component_info(UFS, ufs_get_capacity_size(ufs_capacity), ufs_vendor_and_rev);
 out:
 	return err;
 
 }
+#endif
 
 void ufs_advertise_fixup_device(struct ufs_hba *hba)
 {

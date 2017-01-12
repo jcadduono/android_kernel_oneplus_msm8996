@@ -9,12 +9,16 @@
 #include <linux/gpio.h>
 #include <linux/of_gpio.h>
 #include <linux/slab.h>
-#include <linux/project_info.h>
 #include <linux/miscdevice.h>
 #include <linux/uaccess.h>
 #include <linux/power_supply.h>
 #include <linux/wakelock.h>
 #include <linux/interrupt.h>
+
+#ifdef CONFIG_OEM_PROJECT_INFO
+#include <linux/project_info.h>
+#endif
+
 #include "oem_external_fg.h"
 
 #define BYTE_OFFSET			2
@@ -539,7 +543,9 @@ static void update_fireware_version_func(struct work_struct *work)
 
 	sprintf(di->fw_id,"0x%x",dashchg_firmware_data[di->dashchg_fw_ver_count - 4]);
 	sprintf(di->manu_name,"%s","ONEPLUS");
+#ifdef CONFIG_OEM_PROJECT_INFO
 	push_component_info(FAST_CHARGE,di->fw_id,di->manu_name);
+#endif
 }
 
 void di_watchdog(unsigned long data)

@@ -56,7 +56,10 @@
 #include <net/cnss_prealloc.h>
 #endif
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 #include <linux/project_info.h>
+#endif
+
 static u32 fw_version;
 
 #define subsys_to_drv(d) container_of(d, struct cnss_data, subsys_desc)
@@ -2775,8 +2778,10 @@ skip_ramdump:
 		goto err_bus_reg;
 	}
 
-        /* product information */
-        push_component_info(WCN, "QCA6164A", "QualComm");
+#ifdef CONFIG_OEM_PROJECT_INFO
+	/* product information */
+	push_component_info(WCN, "QCA6164A", "QualComm");
+#endif
 
 	pr_info("cnss: Platform driver probed successfully.\n");
 	return ret;

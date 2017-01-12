@@ -26,7 +26,9 @@
 #include "mdss_dsi.h"
 #include "mdss_dba_utils.h"
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 #include <linux/project_info.h>
+#endif
 
 #define DT_CMD_HDR 6
 #define MIN_REFRESH_RATE 48
@@ -2606,12 +2608,15 @@ int mdss_dsi_panel_init(struct device_node *node,
 	int ndx)
 {
 	int rc = 0;
-	static const char *panel_name;
+	const char *panel_name;
 	struct mdss_panel_info *pinfo;
-	static const char *panel_manufacture;
-	static const char *panel_version;
-	static const char *backlight_manufacture;
-	static const char *backlight_version;
+#ifdef CONFIG_OEM_PROJECT_INFO
+	const char *panel_manufacture;
+	const char *panel_version;
+	const char *backlight_manufacture;
+	const char *backlight_version;
+#endif
+
 	if (!node || !ctrl_pdata) {
 		pr_err("%s: Invalid arguments\n", __func__);
 		return -ENODEV;
@@ -2638,6 +2643,8 @@ int mdss_dsi_panel_init(struct device_node *node,
 	pinfo->dynamic_switch_pending = false;
 	pinfo->is_lpm_mode = false;
 	pinfo->esd_rdy = false;
+
+#ifdef CONFIG_OEM_PROJECT_INFO
 	panel_manufacture = of_get_property(node, "qcom,mdss-dsi-panel-manufacture", NULL);
 	if (!panel_manufacture)
 		pr_info("%s:%d, panel manufacture not specified\n", __func__, __LINE__);
@@ -2654,10 +2661,11 @@ int mdss_dsi_panel_init(struct device_node *node,
 
 	push_component_info(LCD, (char *)panel_version, (char *)panel_manufacture);
 	push_component_info(BACKLIGHT, (char *)backlight_version, (char *)backlight_manufacture);
+#endif
 
 	ctrl_pdata->high_brightness_panel= of_property_read_bool(node,
 					"qcom,mdss-dsi-high-brightness-panel");
-    pr_err("high brightness panel: %d\n", ctrl_pdata->high_brightness_panel);
+	pr_err("high brightness panel: %d\n", ctrl_pdata->high_brightness_panel);
 	ctrl_pdata->on = mdss_dsi_panel_on;
 	ctrl_pdata->post_panel_on = mdss_dsi_post_panel_on;
 	ctrl_pdata->off = mdss_dsi_panel_off;
