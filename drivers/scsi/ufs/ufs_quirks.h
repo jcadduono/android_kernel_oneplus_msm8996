@@ -142,5 +142,8 @@ struct ufs_card_fix {
 struct ufs_hba;
 void ufs_advertise_fixup_device(struct ufs_hba *hba);
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 int ufs_fill_info(struct ufs_hba *hba);
+#endif
+
 #endif /* UFS_QUIRKS_H_ */

@@ -63,9 +63,10 @@
 //ruanbanmao add
 #include <linux/clk.h>
 #include <linux/regulator/consumer.h>
+
+#ifdef CONFIG_OEM_PROJECT_INFO
 #include <linux/project_info.h>
-
-
+#endif
 
 #define DRAGON_NFC 1
 #define SIG_NFC 44
@@ -909,7 +910,9 @@ static int pn544_probe(struct i2c_client *client,
     i2c_set_clientdata(client, pn544_dev);
     /*add for wake up ap side*/
     enable_irq_wake(pn544_dev->client->irq);
+#ifdef CONFIG_OEM_PROJECT_INFO
     push_component_info(NFC, "NQ220", "NXP");
+#endif
     return 0;
 
     err_request_irq_failed:

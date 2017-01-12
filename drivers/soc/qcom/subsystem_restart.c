@@ -164,7 +164,9 @@ struct subsys_device {
 	struct wakeup_source ssr_wlock;
 	char wlname[64];
 	struct work_struct device_restart_work;
+#ifdef CONFIG_PARAM_READ_WRITE
 	struct work_struct crash_record_work;
+#endif
 	struct subsys_tracking track;
 
 	void *notify;
@@ -1102,6 +1104,7 @@ static void device_restart_work_hdlr(struct work_struct *work)
 							dev->desc->name);
 }
 
+#ifdef CONFIG_PARAM_READ_WRITE
 #define KMSG_BUFSIZE 512
 #define MAX_RECORD_COUNT 16
 #define PARAM_CRASH_RECORD_SIZE 20
@@ -1182,7 +1185,7 @@ void check_crash_restart(struct work_struct *work)
     }
 
 }
-
+#endif
 
 int subsystem_restart_dev(struct subsys_device *dev)
 {
@@ -1198,7 +1201,9 @@ int subsystem_restart_dev(struct subsys_device *dev)
 
 	name = dev->desc->name;
 
+#ifdef CONFIG_PARAM_READ_WRITE
 	schedule_work(&dev->crash_record_work);
+#endif
 
 	/*
 	 * If a system reboot/shutdown is underway, ignore subsystem errors.
@@ -1800,7 +1805,9 @@ struct subsys_device *subsys_register(struct subsys_desc *desc)
 
 	snprintf(subsys->wlname, sizeof(subsys->wlname), "ssr(%s)", desc->name);
 	wakeup_source_init(&subsys->ssr_wlock, subsys->wlname);
+#ifdef CONFIG_PARAM_READ_WRITE
 	INIT_WORK(&subsys->crash_record_work, check_crash_restart);
+#endif
 	INIT_WORK(&subsys->work, subsystem_restart_wq_func);
 	INIT_WORK(&subsys->device_restart_work, device_restart_work_hdlr);
 	spin_lock_init(&subsys->track.s_lock);

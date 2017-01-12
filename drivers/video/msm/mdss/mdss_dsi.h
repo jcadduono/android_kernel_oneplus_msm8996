@@ -542,20 +542,23 @@ struct mdss_dsi_ctrl_pdata {
 	struct dsi_panel_cmds hbm_on_cmds;
 	struct dsi_panel_cmds hbm_off_cmds;
 
-	int  SRGB_mode;
+#ifdef CONFIG_PARAM_READ_WRITE
 	int SRGB_first_on;
+	int Adobe_RGB_first_on;
+	int dci_p3_first_on;
+#endif
+
+	int SRGB_mode;
 	struct dsi_panel_cmds srgb_on_cmds;
 	struct dsi_panel_cmds srgb_off_cmds;
 
-		int  Adobe_RGB_mode;
-		int Adobe_RGB_first_on;
-		struct dsi_panel_cmds Adobe_RGB_on_cmds;
-		struct dsi_panel_cmds Adobe_RGB_off_cmds;
+	int Adobe_RGB_mode;
+	struct dsi_panel_cmds Adobe_RGB_on_cmds;
+	struct dsi_panel_cmds Adobe_RGB_off_cmds;
 
-		int  dci_p3_mode;
-		int dci_p3_first_on;
-		struct dsi_panel_cmds dci_p3_on_cmds;
-		struct dsi_panel_cmds dci_p3_off_cmds;
+	int dci_p3_mode;
+	struct dsi_panel_cmds dci_p3_on_cmds;
+	struct dsi_panel_cmds dci_p3_off_cmds;
 
 
 	bool ds_registered;

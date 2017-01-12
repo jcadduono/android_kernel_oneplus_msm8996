@@ -49,7 +49,9 @@
 #include <linux/fb.h>
 #endif /*CONFIG_FB*/
 
+#ifdef CONFIG_PARAM_READ_WRITE
 #include <linux/param_rw.h>
+#endif
 #include <linux/timer.h>
 #include <linux/timex.h>
 #include <linux/rtc.h>
@@ -298,7 +300,9 @@ struct smbchg_chip {
 	struct smbchg_regulator		otg_vreg;
 	struct smbchg_regulator		ext_otg_vreg;
 	struct work_struct		usb_set_online_work;
+#ifdef CONFIG_PARAM_READ_WRITE
 	struct delayed_work		charger_type_record_work;
+#endif
 	struct delayed_work		vfloat_adjust_work;
 	struct delayed_work		hvdcp_det_work;
 	spinlock_t			sec_access_lock;
@@ -2110,6 +2114,7 @@ static bool is_hvdcp_present(struct smbchg_chip *chip)
 	return false;
 }
 
+#ifdef CONFIG_PARAM_READ_WRITE
 #define MAX_TYPE_RECORD_COUNT 48
 #define PARAM_CHG_TYPE_RECORD_SIZE 20
 
@@ -2187,7 +2192,7 @@ void charger_type_record(struct work_struct *work)
         chip->record_chg_type_count++;
     }
 }
-
+#endif
 
 #define FCC_CFG			0xF2
 #define FCC_500MA_VAL		0x4
@@ -5337,9 +5342,10 @@ static void handle_usb_insertion(struct smbchg_chip *chip)
 			}
 		}
 	}
+#ifdef CONFIG_PARAM_READ_WRITE
 	schedule_delayed_work(&chip->charger_type_record_work,
 		msecs_to_jiffies(200));
-
+#endif
 }
 
 void update_usb_status(struct smbchg_chip *chip, bool usb_present, bool force)
@@ -9436,8 +9442,10 @@ static int set_dash_charger_present(int status)
 		if (g_chip->dash_present && !pre_dash_present) {
 			power_supply_set_online(g_chip->usb_psy, true);
 			pr_info("set dash online\n");
+#ifdef CONFIG_PARAM_READ_WRITE
 			schedule_delayed_work(&g_chip->charger_type_record_work,
 			msecs_to_jiffies(600));
+#endif
 			power_supply_set_supply_type(g_chip->usb_psy, POWER_SUPPLY_TYPE_DASH);
 			power_supply_set_current_limit(g_chip->usb_psy, DEFAULT_WALL_CHG_MA * 1000);
 		}
@@ -9773,7 +9781,9 @@ static int smbchg_probe(struct spmi_device *spmi)
 		return PTR_ERR(chip->aicl_deglitch_short_votable);
 
 	INIT_WORK(&chip->usb_set_online_work, smbchg_usb_update_online_work);
+#ifdef CONFIG_PARAM_READ_WRITE
 	INIT_DELAYED_WORK(&chip->charger_type_record_work, charger_type_record);
+#endif
 	INIT_DELAYED_WORK(&chip->parallel_en_work,
 			smbchg_parallel_usb_en_work);
 	INIT_DELAYED_WORK(&chip->vfloat_adjust_work, smbchg_vfloat_adjust_work);

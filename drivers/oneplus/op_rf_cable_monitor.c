@@ -12,10 +12,6 @@
 #include <linux/stat.h>
 #include <linux/string.h>
 #include <linux/types.h>
-#include <linux/project_info.h>
-
-#include <soc/qcom/smem.h>
-
 #include <linux/gpio.h>
 #include <linux/workqueue.h>
 #include <linux/interrupt.h>
@@ -28,7 +24,12 @@
 #include <linux/module.h>
 #include <linux/of_gpio.h>
 
+#ifdef CONFIG_OEM_PROJECT_INFO
+#include <linux/project_info.h>
+#include <soc/qcom/smem.h>
+
 static struct project_info * project_info_desc;
+#endif
 
 struct cable_data {
 	int irq;
@@ -61,6 +62,7 @@ static char *cmdline_find_option(char *str)
     return strstr(saved_command_line, str);
 }
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 int modify_rf_cable_smem_info(uint32 status)
 {
 	project_info_desc = smem_find(SMEM_PROJECT_INFO,
@@ -77,7 +79,7 @@ int modify_rf_cable_smem_info(uint32 status)
 	}
 	return 0;
 }
-
+#endif
 
 extern void op_restart_modem(void);
 static void rf_cable_work(struct work_struct *work)
@@ -94,7 +96,9 @@ static void rf_cable_work(struct work_struct *work)
         if (atomic_read(&_cdata->pre_state) != gpio_get_value(_cdata->cable_gpio))
         {
             atomic_set(&_cdata->pre_state, gpio_get_value(_cdata->cable_gpio));
+#ifdef CONFIG_OEM_PROJECT_INFO
             modify_rf_cable_smem_info(gpio_get_value(_cdata->cable_gpio));
+#endif
             op_restart_modem();
         }
         //mdelay(2000);
@@ -155,7 +159,9 @@ static ssize_t rf_cable_proc_write_func(struct file *file, const char __user *bu
             if (atomic_read(&_cdata->pre_state) != 1)
             {
                 atomic_set(&_cdata->pre_state, 1);
+#ifdef CONFIG_OEM_PROJECT_INFO
                 modify_rf_cable_smem_info(1);
+#endif
                 op_restart_modem();
             }
         }
@@ -168,7 +174,9 @@ static ssize_t rf_cable_proc_write_func(struct file *file, const char __user *bu
             if (atomic_read(&_cdata->pre_state) != gpio_get_value(_cdata->cable_gpio))
             {
                 atomic_set(&_cdata->pre_state, gpio_get_value(_cdata->cable_gpio));
+#ifdef CONFIG_OEM_PROJECT_INFO
                 modify_rf_cable_smem_info(gpio_get_value(_cdata->cable_gpio));
+#endif
                 op_restart_modem();
             }
         }
@@ -233,7 +241,9 @@ static int op_rf_cable_probe(struct platform_device *pdev)
     if (cmdline_find_option("ftm_mode"))
     {
         pr_err("%s: ftm_mode FOUND! use 1 always\n",__func__);
+#ifdef CONFIG_OEM_PROJECT_INFO
         modify_rf_cable_smem_info(1);
+#endif
     }
     else
     {
@@ -280,7 +290,9 @@ static int op_rf_cable_probe(struct platform_device *pdev)
     	atomic_set(&_cdata->running, 0);
     	atomic_set(&_cdata->pre_state, gpio_get_value(_cdata->cable_gpio));
 
+#ifdef CONFIG_OEM_PROJECT_INFO
         modify_rf_cable_smem_info(gpio_get_value(_cdata->cable_gpio));
+#endif
         create_rf_cable_procfs();
     }
     pr_err("%s: probe ok!\n", __func__);

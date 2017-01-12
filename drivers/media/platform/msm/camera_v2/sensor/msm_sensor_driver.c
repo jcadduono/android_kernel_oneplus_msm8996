@@ -19,10 +19,10 @@
 #include "msm_camera_dt_util.h"
 
 #include <linux/proc_fs.h>
-bool pdaf_calibration_flag = false;
-uint32_t is_pdaf_supported = 0;
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 #include <linux/project_info.h>
+
 struct camera_vendor_match_tbl {
     char sensor_name[32];
     char vendor_name[32];
@@ -33,6 +33,10 @@ static struct camera_vendor_match_tbl match_tbl[] = {
     {"s5k3p8","Samsung"},
     {"s5k3p8sp","Samsung"},
 };
+#endif
+
+bool pdaf_calibration_flag = false;
+uint32_t is_pdaf_supported = 0;
 
 /* Logging macro */
 #undef CDBG
@@ -658,8 +662,10 @@ int32_t msm_sensor_driver_probe(void *setting,
 	struct msm_camera_cci_client        *cci_client = NULL;
 	struct msm_camera_sensor_slave_info *slave_info = NULL;
 	struct msm_camera_slave_info        *camera_info = NULL;
-	uint32_t count = 0,i;
+#ifdef CONFIG_OEM_PROJECT_INFO
+	uint32_t i, count = 0;
 	enum COMPONENT_TYPE CameraID;
+#endif
 
 	unsigned long                        mount_pos = 0;
 	uint32_t                             is_yuv;
@@ -970,6 +976,7 @@ CSID_TG:
 	/*Save sensor info*/
 	s_ctrl->sensordata->cam_slave_info = slave_info;
 
+#ifdef CONFIG_OEM_PROJECT_INFO
 	if (0 == slave_info->camera_id)
 		CameraID = R_CAMERA;
 	else
@@ -986,6 +993,7 @@ CSID_TG:
 	else
 		push_component_info(CameraID,match_tbl[i].sensor_name,
 			match_tbl[i].vendor_name);
+#endif
 
 	msm_sensor_fill_sensor_info(s_ctrl, probed_info, entity_name);
 

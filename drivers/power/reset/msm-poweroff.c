@@ -45,12 +45,14 @@
 #define SCM_EDLOAD_MODE			0X01
 #define SCM_DLOAD_CMD			0x10
 
+#ifdef CONFIG_PARAM_READ_WRITE
 #define DEVICE_INFO_SIZE 2048
 extern char device_info[DEVICE_INFO_SIZE];
 extern char oem_ufs_manufacture_info[16];
 extern char oem_ufs_fw_version[3];
 extern uint32_t chip_serial_num;
 extern struct boot_shared_imem_cookie_type *boot_shared_imem_cookie_ptr;
+#endif
 
 static int restart_mode;
 static void *restart_reason, *dload_type_addr;
@@ -559,6 +561,7 @@ static int msm_restart_probe(struct platform_device *pdev)
 			pr_err("unable to map imem EDLOAD mode offset\n");
 	}
 
+#ifdef CONFIG_PARAM_READ_WRITE
 	sprintf(device_info + strlen(device_info),
 		"socinfo serial_number: 0x%08x\r\n"
 		"ufs manufacturer: %s\r\n"
@@ -571,6 +574,7 @@ static int msm_restart_probe(struct platform_device *pdev)
 		pr_err("unable to map imem DLOAD mode offset for OEM usages\n");
 	else
 		__raw_writel(strlen(device_info), &(boot_shared_imem_cookie_ptr->device_info_size));
+#endif
 
 	np = of_find_compatible_node(NULL, NULL,
 				"qcom,msm-imem-dload-type");
