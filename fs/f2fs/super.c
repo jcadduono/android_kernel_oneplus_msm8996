@@ -984,7 +984,9 @@ static void default_options(struct f2fs_sb_info *sbi)
 
 	set_opt(sbi, BG_GC);
 	set_opt(sbi, INLINE_DATA);
+#ifndef CONFIG_F2FS_DEFAULT_NOINLINE_DENTRY
 	set_opt(sbi, INLINE_DENTRY);
+#endif
 	set_opt(sbi, EXTENT_CACHE);
 	set_opt(sbi, FLUSH_MERGE);
 	if (f2fs_sb_mounted_blkzoned(sbi->sb)) {
@@ -996,6 +998,9 @@ static void default_options(struct f2fs_sb_info *sbi)
 
 #ifdef CONFIG_F2FS_FS_XATTR
 	set_opt(sbi, XATTR_USER);
+#ifdef CONFIG_F2FS_DEFAULT_INLINE_XATTR
+	set_opt(sbi, INLINE_XATTR);
+#endif
 #endif
 #ifdef CONFIG_F2FS_FS_POSIX_ACL
 	set_opt(sbi, POSIX_ACL);
