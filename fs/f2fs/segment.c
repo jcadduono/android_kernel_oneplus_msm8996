@@ -445,6 +445,10 @@ int f2fs_issue_flush(struct f2fs_sb_info *sbi)
 	if (test_opt(sbi, NOBARRIER))
 		return 0;
 
+	// cmd_control_info set as NULL from destroy_flush_cmd_control.
+	if (fcc == NULL)
+		return 0;
+
 	if (!test_opt(sbi, FLUSH_MERGE) || !atomic_read(&fcc->submit_flush)) {
 		struct bio *bio = f2fs_bio_alloc(0);
 		int ret;

@@ -84,7 +84,7 @@ extern char *fault_name[FAULT_MAX];
 #define F2FS_MOUNT_FAULT_INJECTION	0x00010000
 #define F2FS_MOUNT_ADAPTIVE		0x00020000
 #define F2FS_MOUNT_LFS			0x00040000
-
+#define LOOKUP_CASE_INSENSITIVE	0x8000
 #define clear_opt(sbi, option)	(sbi->mount_opt.opt &= ~F2FS_MOUNT_##option)
 #define set_opt(sbi, option)	(sbi->mount_opt.opt |= F2FS_MOUNT_##option)
 #define test_opt(sbi, option)	(sbi->mount_opt.opt & F2FS_MOUNT_##option)
@@ -98,6 +98,12 @@ typedef u32 block_t;	/*
 			 * address format, __le32.
 			 */
 typedef u32 nid_t;
+
+struct ci_name_buf {
+	char name[F2FS_NAME_LEN+1];
+	f2fs_hash_t name_hash;
+	bool match;
+};
 
 struct f2fs_mount_info {
 	unsigned int	opt;
@@ -2000,7 +2006,7 @@ struct dentry *f2fs_get_parent(struct dentry *child);
 void set_de_type(struct f2fs_dir_entry *, umode_t);
 unsigned char get_de_type(struct f2fs_dir_entry *);
 struct f2fs_dir_entry *find_target_dentry(struct fscrypt_name *,
-			f2fs_hash_t, int *, struct f2fs_dentry_ptr *);
+			f2fs_hash_t, int *, struct f2fs_dentry_ptr *, struct ci_name_buf *ci_name_bu);
 bool f2fs_fill_dentries(struct dir_context *, struct f2fs_dentry_ptr *,
 			unsigned int, struct fscrypt_str *);
 void do_make_empty_dir(struct inode *, struct inode *,
@@ -2010,10 +2016,10 @@ struct page *init_inode_metadata(struct inode *, struct inode *,
 void update_parent_metadata(struct inode *, struct inode *, unsigned int);
 int room_for_filename(const void *, int, int);
 void f2fs_drop_nlink(struct inode *, struct inode *);
-struct f2fs_dir_entry *__f2fs_find_entry(struct inode *, struct fscrypt_name *,
-							struct page **);
 struct f2fs_dir_entry *f2fs_find_entry(struct inode *, struct qstr *,
-							struct page **);
+							struct page **, struct ci_name_buf *ci_name_bu);
+struct f2fs_dir_entry *__f2fs_find_entry(struct inode *, struct fscrypt_name *,
+							struct page **, struct ci_name_buf *ci_name_bu);
 struct f2fs_dir_entry *f2fs_parent_dir(struct inode *, struct page **);
 ino_t f2fs_inode_by_name(struct inode *, struct qstr *, struct page **);
 void f2fs_set_link(struct inode *, struct f2fs_dir_entry *,
