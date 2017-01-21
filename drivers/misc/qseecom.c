@@ -80,6 +80,9 @@
 /* Encrypt/Decrypt Data Integrity Partition (DIP) for MDTP */
 #define SCM_MDTP_CIPHER_DIP		0x01
 
+/* Maximum Allowed Size (128K) of Data Integrity Partition (DIP) for MDTP */
+#define MAX_DIP			0x20000
+
 #define RPMB_SERVICE			0x2000
 #define SSD_SERVICE			0x3000
 
@@ -1269,8 +1272,7 @@ static int __qseecom_set_msm_bus_request(uint32_t mode)
 					ret = __qseecom_enable_clk(CLK_QSEE);
 					if (ret)
 						pr_err("CLK enable failed\n");
-				}
-				else
+				} else
 					__qseecom_disable_clk(CLK_QSEE);
 			}
 		}
@@ -3955,6 +3957,7 @@ static int __qseecom_load_fw(struct qseecom_dev_handle *data, char *appname)
 		pr_err("cache operation failed %d\n", ret);
 		goto exit_disable_clk_vote;
 	}
+
 	/* SCM_CALL to load the image */
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1, cmd_buf, cmd_len,
 			&resp, sizeof(resp));
@@ -4074,6 +4077,7 @@ static int qseecom_load_commonlib_image(struct qseecom_dev_handle *data,
 		pr_err("cache operation failed %d\n", ret);
 		goto exit_disable_clk_vote;
 	}
+
 	/* SCM_CALL to load the image */
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1, cmd_buf, cmd_len,
 							&resp, sizeof(resp));
@@ -4646,11 +4650,10 @@ static int __qseecom_enable_clk(enum qseecom_ce_hw_instance ce)
 	}
 	mutex_lock(&clk_access_lock);
 
-	if (qclk->clk_access_cnt == ULONG_MAX){
+	if (qclk->clk_access_cnt == ULONG_MAX) {
 		pr_err("clk_access_cnt beyond limitation\n");
 		goto err;
 	}
-
 	if (qclk->clk_access_cnt > 0) {
 		qclk->clk_access_cnt++;
 		mutex_unlock(&clk_access_lock);
@@ -5335,10 +5338,10 @@ static int __qseecom_set_clear_ce_key(struct qseecom_dev_handle *data,
 		pr_err("Error:: unsupported usage %d\n", usage);
 		return -EFAULT;
 	}
-
 	ret = __qseecom_enable_clk(CLK_QSEE);
 	if (ret)
 		return ret;
+
 	if (qseecom.qsee.instance != qseecom.ce_drv.instance) {
 		ret = __qseecom_enable_clk(CLK_CE_DRV);
 		if (ret)
@@ -5926,7 +5929,8 @@ static int qseecom_mdtp_cipher_dip(void __user *argp)
 		}
 
 		if (req.in_buf == NULL || req.out_buf == NULL ||
-			req.in_buf_size == 0 || req.out_buf_size == 0 ||
+			req.in_buf_size == 0 || req.in_buf_size > MAX_DIP ||
+			req.out_buf_size == 0 || req.out_buf_size > MAX_DIP ||
 				req.direction > 1) {
 				pr_err("invalid parameters\n");
 				ret = -EINVAL;
@@ -6349,6 +6353,7 @@ static int __qseecom_qteec_issue_cmd(struct qseecom_dev_handle *data,
 		pr_err("cache operation failed %d\n", ret);
 		return ret;
 	}
+
 	__qseecom_reentrancy_check_if_this_app_blocked(ptr_app);
 
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1,
@@ -6570,9 +6575,13 @@ static int qseecom_qteec_invoke_modfd_cmd(struct qseecom_dev_handle *data,
 	if (ret)
 		return ret;
 
-	msm_ion_do_cache_op(qseecom.ion_clnt, data->client.ihandle,
+	ret = msm_ion_do_cache_op(qseecom.ion_clnt, data->client.ihandle,
 				data->client.sb_virt, data->client.sb_length,
 				ION_IOC_INV_CACHES);
+	if (ret) {
+		pr_err("cache operation failed %d\n", ret);
+		return ret;
+	}
 	return 0;
 }
 
