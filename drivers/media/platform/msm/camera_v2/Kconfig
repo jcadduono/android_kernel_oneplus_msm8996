@@ -95,6 +95,14 @@ config MSM_EEPROM
           and also provides support for writing data in case of FLASH ROM.
 	  Currently supports I2C, CCI and SPI protocol
 
+config MSM_IR_LED
+	bool "Qualcomm MSM Infrared LED interface support"
+	depends on MSMB_CAMERA
+	---help---
+	  Enable support for infrared LEDs mounted with the camera
+	  sensor. This changes the userspace API and should be disabled
+	  in the event that the mm-qcamera-daemon does not support it.
+
 config MSM_ISPIF
         bool "Qualcomm MSM Image Signal Processing interface support"
         depends on MSMB_CAMERA
