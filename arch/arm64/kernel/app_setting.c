@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -33,11 +33,15 @@ module_param_call(lib_name, set_name, param_get_string, &kps, S_IWUSR);
 
 bool use_app_setting = true;
 module_param(use_app_setting, bool, 0644);
+MODULE_PARM_DESC(use_app_setting, "control use of app specific settings");
 
 bool use_32bit_app_setting = true;
 module_param(use_32bit_app_setting, bool, 0644);
 MODULE_PARM_DESC(use_32bit_app_setting, "control use of 32 bit app specific settings");
-MODULE_PARM_DESC(use_app_setting, "control use of app specific settings");
+
+bool use_32bit_app_setting_pro = false;
+module_param(use_32bit_app_setting_pro, bool, 0644);
+MODULE_PARM_DESC(use_32bit_app_setting_pro, "control use of 32 bit app specific settings");
 
 static int set_name(const char *str, struct kernel_param *kp)
 {
@@ -92,7 +96,7 @@ void switch_app_setting_bit(struct task_struct *prev, struct task_struct *next)
 EXPORT_SYMBOL(switch_app_setting_bit);
 
 void switch_32bit_app_setting_bit(struct task_struct *prev,
-                                     struct task_struct *next)
+					struct task_struct *next)
 {
 	if (prev->mm && unlikely(is_compat_thread(task_thread_info(prev))))
 		clear_app_setting_bit_for_32bit_apps();
@@ -101,7 +105,6 @@ void switch_32bit_app_setting_bit(struct task_struct *prev,
 		set_app_setting_bit_for_32bit_apps();
 }
 EXPORT_SYMBOL(switch_32bit_app_setting_bit);
-
 
 void apply_app_setting_bit(struct file *file)
 {
