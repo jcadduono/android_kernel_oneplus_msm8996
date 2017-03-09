@@ -445,6 +445,8 @@ int f2fs_issue_flush(struct f2fs_sb_info *sbi)
 	if (test_opt(sbi, NOBARRIER))
 		return 0;
 
+	if (fcc == NULL)
+		return 0;
 	if (!test_opt(sbi, FLUSH_MERGE) || !atomic_read(&fcc->submit_flush)) {
 		struct bio *bio = f2fs_bio_alloc(0);
 		int ret;
@@ -489,6 +491,7 @@ int create_flush_cmd_control(struct f2fs_sb_info *sbi)
 	if (IS_ERR(fcc->f2fs_issue_flush)) {
 		err = PTR_ERR(fcc->f2fs_issue_flush);
 		kfree(fcc);
+		fcc = NULL;
 		SM_I(sbi)->cmd_control_info = NULL;
 		return err;
 	}
@@ -503,6 +506,7 @@ void destroy_flush_cmd_control(struct f2fs_sb_info *sbi)
 	if (fcc && fcc->f2fs_issue_flush)
 		kthread_stop(fcc->f2fs_issue_flush);
 	kfree(fcc);
+	fcc = NULL;
 	SM_I(sbi)->cmd_control_info = NULL;
 }
 
